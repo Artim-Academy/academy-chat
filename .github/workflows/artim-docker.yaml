@@ -1,0 +1,58 @@
+# Builds the Artim Academy chat image and publishes it to ghcr.io/artim-academy/academy-chat.
+name: Artim Academy Docker
+on:
+    workflow_dispatch: {}
+    push:
+        branches: [develop, "artim/**"]
+concurrency: ${{ github.workflow }}-${{ github.ref_name }}
+permissions: {}
+jobs:
+    build:
+        name: Build and push
+        if: github.repository == 'Artim-Academy/academy-chat'
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write # needed for publishing to GHCR
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+              with:
+                  fetch-depth: 0 # needed for docker-package to be able to calculate the version
+                  persist-credentials: false
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+              with:
+                  install: true
+
+            - name: Log in to GHCR
+              uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+              with:
+                  registry: ghcr.io
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Docker metadata
+              id: meta
+              uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6
+              with:
+                  images: ghcr.io/artim-academy/academy-chat
+                  bake-target: docker-metadata-action
+                  tags: |
+                      type=ref,event=branch
+                      type=sha,format=short
+                      type=raw,value=latest,enable={{is_default_branch}}
+
+            - name: Build and push
+              uses: docker/bake-action@018cb6412ab401ebaa809aa5f85966b74628600f # v7
+              with:
+                  source: .
+                  files: |
+                      ./docker-bake.hcl
+                      cwd://${{ steps.meta.outputs.bake-file }}
+                  targets: element-web
+                  push: true
+                  set: |
+                      element-web.platforms=linux/amd64
+                      element-web.cache-from=type=gha
+                      element-web.cache-to=type=gha,mode=max
