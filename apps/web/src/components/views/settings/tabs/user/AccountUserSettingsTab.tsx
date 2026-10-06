@@ -25,6 +25,8 @@ import { SettingsSection } from "../../shared/SettingsSection";
 import { SettingsSubsection, SettingsSubsectionText } from "../../shared/SettingsSubsection";
 import { UserPersonalInfoSettings } from "../../UserPersonalInfoSettings";
 import { SDKContext } from "../../../../../contexts/SDKContext.ts";
+import { useAccountData } from "../../../../../hooks/useAccountData";
+import { LMS_SYNC_EVENT_TYPE, type LmsSyncSummary } from "../../../../../utils/lms/LmsSync";
 
 interface IProps {
     closeSettingsFn: () => void;
@@ -95,6 +97,8 @@ const AccountUserSettingsTab: React.FC<IProps> = ({ closeSettingsFn, startCustom
 
     const sdkContext = useContext(SDKContext);
     const cli = sdkContext.client!;
+    // Profile, password and contact details of LMS accounts are maintained in the LMS only.
+    const isLmsManaged = Boolean(useAccountData<Partial<LmsSyncSummary>>(cli, LMS_SYNC_EVENT_TYPE).lms_user_id);
 
     useEffect(() => {
         (async () => {
@@ -176,7 +180,7 @@ const AccountUserSettingsTab: React.FC<IProps> = ({ closeSettingsFn, startCustom
 
     let accountManagementSection: JSX.Element | undefined;
     const isAccountManagedExternally = Boolean(externalAccountManagementUrl);
-    if (SettingsStore.getValue(UIFeature.Deactivate) && !isAccountManagedExternally) {
+    if (SettingsStore.getValue(UIFeature.Deactivate) && !isAccountManagedExternally && !isLmsManaged) {
         accountManagementSection = <ManagementSection onDeactivateClicked={onDeactivateClicked} />;
     }
 
@@ -184,15 +188,15 @@ const AccountUserSettingsTab: React.FC<IProps> = ({ closeSettingsFn, startCustom
         <SettingsTab data-testid="mx_AccountUserSettingsTab">
             <UserProfileSettings
                 externalAccountManagementUrl={externalAccountManagementUrl}
-                canSetDisplayName={canSetDisplayName}
-                canSetAvatar={canSetAvatar}
+                canSetDisplayName={canSetDisplayName && !isLmsManaged}
+                canSetAvatar={canSetAvatar && !isLmsManaged}
                 startCustomStatus={startCustomStatus}
             />
-            {(!isAccountManagedExternally || canMake3pidChanges) && (
+            {!isLmsManaged && (!isAccountManagedExternally || canMake3pidChanges) && (
                 <UserPersonalInfoSettings canMake3pidChanges={canMake3pidChanges} />
             )}
             <AccountSection
-                canChangePassword={canChangePassword}
+                canChangePassword={canChangePassword && !isLmsManaged}
                 onPasswordChanged={onPasswordChanged}
                 onPasswordChangeError={onPasswordChangeError}
             />

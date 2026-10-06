@@ -19,7 +19,7 @@ import {
     TestSDKContext,
 } from "test-utils";
 import React from "react";
-import { type MatrixClient, ThreepidMedium } from "matrix-js-sdk/src/matrix";
+import { type MatrixClient, MatrixEvent, ThreepidMedium } from "matrix-js-sdk/src/matrix";
 import { logger } from "matrix-js-sdk/src/logger";
 import userEvent from "@testing-library/user-event";
 import { ToastContext, ToastRack } from "@element-hq/web-shared-components";
@@ -30,6 +30,7 @@ import SettingsStore from "../../../../../settings/SettingsStore";
 import { UIFeature } from "../../../../../settings/UIFeature";
 import MatrixClientContext from "../../../../../contexts/MatrixClientContext";
 import Modal from "../../../../../Modal";
+import { LMS_SYNC_EVENT_TYPE } from "../../../../../utils/lms/LmsSync";
 
 let changePasswordOnError: (e: Error) => void;
 let changePasswordOnFinished: () => void;
@@ -79,6 +80,7 @@ describe("<AccountUserSettingsTab />", () => {
             getMediaConfig: vi.fn(),
             getAuthMetadata: vi.fn().mockRejectedValue(new Error("not implemented")),
             getSyncState: vi.fn().mockReturnValue("SYNCING"),
+            getAccountData: vi.fn().mockReturnValue(undefined),
         });
 
         mockClient.getCapabilities.mockResolvedValue({});
@@ -418,6 +420,37 @@ describe("<AccountUserSettingsTab />", () => {
                 title: "Error changing password",
                 description: ERROR_STRING,
             });
+        });
+    });
+
+    describe("when the account is managed by the Artim Academy LMS", () => {
+        beforeEach(() => {
+            vi.spyOn(SettingsStore, "getValue").mockImplementation(
+                (settingName) => settingName === UIFeature.Deactivate || settingName === UIFeature.ThirdPartyID,
+            );
+            mockClient.getCapabilities.mockResolvedValue({ "m.change_password": { enabled: true } });
+            mockClient.getAccountData.mockImplementation((type) =>
+                type === LMS_SYNC_EVENT_TYPE
+                    ? new MatrixEvent({ type, content: { lms_user_id: "64f0c0ffee", courses: [], roles: [] } })
+                    : undefined,
+            );
+        });
+
+        it("hides password change, email addresses, phone numbers and deactivation", async () => {
+            render(getComponent());
+            await flushPromises();
+
+            expect(screen.queryByTestId("accountSection")).not.toBeInTheDocument();
+            expect(screen.queryByTestId("mx_AccountEmailAddresses")).not.toBeInTheDocument();
+            expect(screen.queryByTestId("mx_AccountPhoneNumbers")).not.toBeInTheDocument();
+            expect(screen.queryByText("Deactivate Account")).not.toBeInTheDocument();
+        });
+
+        it("does not allow changing the display name", async () => {
+            render(getComponent());
+            await flushPromises();
+
+            expect(screen.getByRole("textbox", { name: "Display Name" })).toBeDisabled();
         });
     });
 });
