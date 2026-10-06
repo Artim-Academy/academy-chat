@@ -23,6 +23,7 @@ import LockIcon from "@vector-im/compound-design-tokens/assets/web/icons/lock";
 import LabsIcon from "@vector-im/compound-design-tokens/assets/web/icons/labs";
 import BlockIcon from "@vector-im/compound-design-tokens/assets/web/icons/block";
 import HelpIcon from "@vector-im/compound-design-tokens/assets/web/icons/help";
+import VerifiedIcon from "@vector-im/compound-design-tokens/assets/web/icons/verified";
 import { ToastContext, useActiveToast } from "@element-hq/web-shared-components";
 
 import TabbedView, { Tab, useActiveTabWithDefault } from "../../structures/TabbedView";
@@ -43,6 +44,7 @@ import SidebarUserSettingsTab from "../settings/tabs/user/SidebarUserSettingsTab
 import KeyboardUserSettingsTab from "../settings/tabs/user/KeyboardUserSettingsTab";
 import SessionManagerTab from "../settings/tabs/user/SessionManagerTab";
 import { UserTab } from "./UserTab";
+import { LmsSyncUserSettingsTab } from "../settings/tabs/user/LmsSyncUserSettingsTab";
 import { type NonEmptyArray } from "../../../@types/common";
 import { SDKContext } from "../../../contexts/SDKContext";
 import { type SDKContextClass } from "../../../contexts/SDKContextClass";
@@ -74,6 +76,8 @@ function titleForTabID(tabId: UserTab): React.ReactNode {
     switch (tabId) {
         case UserTab.Account:
             return _t("settings|account|dialog_title", undefined, subs);
+        case UserTab.ArtimAcademy:
+            return _t("settings|lms_sync|dialog_title", undefined, subs);
         case UserTab.SessionManager:
             return _t("settings|sessions|dialog_title", undefined, subs);
         case UserTab.Appearance:
@@ -140,6 +144,9 @@ export default function UserSettingsDialog(props: IProps): JSX.Element {
                 <AccountUserSettingsTab closeSettingsFn={props.onFinished} startCustomStatus={startCustomStatus} />,
                 "UserSettingsGeneral",
             ),
+        );
+        tabs.push(
+            new Tab(UserTab.ArtimAcademy, _td("settings|lms_sync|title"), <VerifiedIcon />, <LmsSyncUserSettingsTab />),
         );
         tabs.push(
             new Tab(

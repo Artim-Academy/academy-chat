@@ -394,5 +394,24 @@
             "screenshot": "Bildschirmfoto",
             "start_audio_stream": "Audiostream starten"
         }
+    },
+    "settings": {
+        "lms_sync": {
+            "courses_heading": "Kurse",
+            "description": "Dein Profil, deine Rollen und Kurse kommen aus dem Artim Academy LMS und werden automatisch aktualisiert. Änderungen nimmst du im LMS vor.",
+            "email": "E-Mail",
+            "last_synced": "Zuletzt synchronisiert",
+            "lms_user_id": "LMS-Nutzer-ID",
+            "name": "Name",
+            "no_courses": "Du bist noch in keinem Kurs.",
+            "not_synced": "Aus dem Artim Academy LMS wurden noch keine Daten synchronisiert.",
+            "open": "Öffnen",
+            "open_course": "%(title)s öffnen",
+            "profile_heading": "Profil",
+            "role_admin": "Admin",
+            "role_student": "Student",
+            "role_trainer": "Trainer",
+            "roles_heading": "Rollen"
+        }
     }
 }

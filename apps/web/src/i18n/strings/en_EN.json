@@ -2726,6 +2726,10 @@
         "labs_mjolnir": {
             "dialog_title": "<strong>Settings:</strong> Ignored Users"
         },
+        "lms_sync": {
+            "dialog_title": "<strong>Settings:</strong> Artim Academy",
+            "title": "Artim Academy"
+        },
         "media_preview": {
             "hide_avatars": "Hide avatars of room and inviter",
             "hide_media": "Always hide",

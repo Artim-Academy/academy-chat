@@ -1,0 +1,51 @@
+/*
+Copyright 2026 Artim Academy
+
+SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Element-Commercial
+Please see LICENSE in the repository root for full details.
+*/
+
+.view {
+    color: var(--cpd-color-text-primary);
+}
+
+.hint,
+.empty {
+    color: var(--cpd-color-text-secondary);
+}
+
+.details {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: var(--cpd-space-2x) var(--cpd-space-6x);
+    margin: var(--cpd-space-3x) 0 0;
+    font: var(--cpd-font-body-md-regular);
+
+    dt {
+        color: var(--cpd-color-text-secondary);
+    }
+
+    dd {
+        margin: 0;
+        overflow-wrap: anywhere;
+    }
+}
+
+.roles {
+    margin-top: var(--cpd-space-3x);
+}
+
+.courses {
+    list-style: none;
+    margin: var(--cpd-space-3x) 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--cpd-space-2x);
+}
+
+.course {
+    padding: var(--cpd-space-3x) var(--cpd-space-4x);
+    border: var(--cpd-border-width-1) solid var(--cpd-color-border-interactive-secondary);
+    border-radius: var(--cpd-space-3x);
+}

@@ -261,6 +261,25 @@
         },
         "unread_messages": "Unread messages"
     },
+    "settings": {
+        "lms_sync": {
+            "courses_heading": "Courses",
+            "description": "Your profile, roles and courses come from the Artim Academy LMS and are updated automatically. Changes have to be made in the LMS.",
+            "email": "Email",
+            "last_synced": "Last synced",
+            "lms_user_id": "LMS user ID",
+            "name": "Name",
+            "no_courses": "You are not part of any course yet.",
+            "not_synced": "No data has been synced from the Artim Academy LMS yet.",
+            "open": "Open",
+            "open_course": "Open %(title)s",
+            "profile_heading": "Profile",
+            "role_admin": "Admin",
+            "role_student": "Student",
+            "role_trainer": "Trainer",
+            "roles_heading": "Roles"
+        }
+    },
     "status": {
         "set_status": {
             "away": "Away",

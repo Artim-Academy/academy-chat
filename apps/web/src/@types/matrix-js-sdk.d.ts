@@ -14,6 +14,7 @@ import type { EncryptedFile } from "matrix-js-sdk/src/types";
 import type { EmptyObject, IContent } from "matrix-js-sdk/src/matrix";
 import type { DeviceClientInformation } from "../utils/device/types.ts";
 import type { UserWidget } from "../utils/WidgetUtils-types.ts";
+import type { LmsSyncSummary } from "../utils/lms/LmsSync.ts";
 import { type MediaPreviewConfig } from "./media_preview.ts";
 import { type INVITE_RULES_ACCOUNT_DATA_TYPE, type InviteConfigAccountData } from "./invite-rules.ts";
 
@@ -74,6 +75,8 @@ declare module "matrix-js-sdk/src/types" {
         "im.vector.setting.integration_provisioning": { enabled: boolean };
         "im.vector.riot.breadcrumb_rooms": { rooms: string[] };
         "im.vector.web.settings": Record<string, any>;
+        // Artim Academy LMS sync summary, written by the Synapse module
+        "de.artim_academy.lms_sync": LmsSyncSummary;
 
         // URL preview account data event
         "org.matrix.preview_urls": { disable: boolean };

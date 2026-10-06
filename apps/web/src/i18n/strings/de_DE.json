@@ -3021,7 +3021,11 @@
             "voice_section": "Spracheinstellungen"
         },
         "warn_quit": "Vor Beenden warnen",
-        "warning": "<w>WARNUNG:</w> <description/>"
+        "warning": "<w>WARNUNG:</w> <description/>",
+        "lms_sync": {
+            "dialog_title": "<strong>Einstellungen:</strong> Artim Academy",
+            "title": "Artim Academy"
+        }
     },
     "share": {
         "link_copied": "Link kopiert",

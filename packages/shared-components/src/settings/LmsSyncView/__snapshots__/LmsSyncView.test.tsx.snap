@@ -1,0 +1,258 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`LmsSyncView > renders the synced roles and courses 1`] = `
+<div>
+  <div
+    class="Flex-module_flex LmsSyncView-module_view"
+    style="--mx-flex-display: flex; --mx-flex-direction: column; --mx-flex-align: start; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-6x); --mx-flex-wrap: nowrap;"
+  >
+    <p
+      class="_typography_6v6n8_153 _font-body-sm-regular_6v6n8_31 LmsSyncView-module_hint"
+    >
+      Your profile, roles and courses come from the Artim Academy LMS and are updated automatically. Changes have to be made in the LMS.
+    </p>
+    <section>
+      <h3
+        class="_typography_6v6n8_153 _font-heading-sm-semibold_6v6n8_93"
+      >
+        Profile
+      </h3>
+      <dl
+        class="LmsSyncView-module_details"
+      >
+        <dt>
+          Name
+        </dt>
+        <dd>
+          Sam Student
+        </dd>
+        <dt>
+          Email
+        </dt>
+        <dd>
+          sam@example.org
+        </dd>
+        <dt>
+          LMS user ID
+        </dt>
+        <dd>
+          <code>
+            64f0c0ffee0000000000abcd
+          </code>
+        </dd>
+        <dt>
+          Last synced
+        </dt>
+        <dd>
+          6 Oct 2026, 10:00
+        </dd>
+      </dl>
+    </section>
+    <section>
+      <h3
+        class="_typography_6v6n8_153 _font-heading-sm-semibold_6v6n8_93"
+      >
+        Roles
+      </h3>
+      <div
+        class="Flex-module_flex LmsSyncView-module_roles"
+        style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-2x); --mx-flex-wrap: wrap;"
+      >
+        <span
+          class="_typography_6v6n8_153 _font-body-sm-medium_6v6n8_41 _badge_10dml_8"
+          data-kind="grey"
+        >
+          Student
+        </span>
+      </div>
+    </section>
+    <section>
+      <h3
+        class="_typography_6v6n8_153 _font-heading-sm-semibold_6v6n8_93"
+      >
+        Courses
+      </h3>
+      <ul
+        class="LmsSyncView-module_courses"
+      >
+        <li
+          class="LmsSyncView-module_course"
+        >
+          <div
+            class="Flex-module_flex"
+            style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
+          >
+            <div
+              class="Flex-module_flex"
+              style="--mx-flex-display: flex; --mx-flex-direction: column; --mx-flex-align: start; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
+            >
+              <p
+                class="_typography_6v6n8_153 _font-body-md-medium_6v6n8_60"
+              >
+                Webentwicklung
+              </p>
+              <span
+                class="_typography_6v6n8_153 _font-body-sm-medium_6v6n8_41 _badge_10dml_8"
+                data-kind="grey"
+              >
+                Student
+              </span>
+            </div>
+            <button
+              aria-label="Open Webentwicklung"
+              class="_button_1nw83_8"
+              data-kind="secondary"
+              data-size="md"
+              role="button"
+              tabindex="0"
+            >
+              Open
+            </button>
+          </div>
+        </li>
+        <li
+          class="LmsSyncView-module_course"
+        >
+          <div
+            class="Flex-module_flex"
+            style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
+          >
+            <div
+              class="Flex-module_flex"
+              style="--mx-flex-display: flex; --mx-flex-direction: column; --mx-flex-align: start; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
+            >
+              <p
+                class="_typography_6v6n8_153 _font-body-md-medium_6v6n8_60"
+              >
+                Datenbanken
+              </p>
+              <span
+                class="_typography_6v6n8_153 _font-body-sm-medium_6v6n8_41 _badge_10dml_8"
+                data-kind="grey"
+              >
+                Student
+              </span>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </section>
+  </div>
+</div>
+`;
+
+exports[`LmsSyncView > renders the trainer state 1`] = `
+<div>
+  <div
+    class="Flex-module_flex LmsSyncView-module_view"
+    style="--mx-flex-display: flex; --mx-flex-direction: column; --mx-flex-align: start; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-6x); --mx-flex-wrap: nowrap;"
+  >
+    <p
+      class="_typography_6v6n8_153 _font-body-sm-regular_6v6n8_31 LmsSyncView-module_hint"
+    >
+      Your profile, roles and courses come from the Artim Academy LMS and are updated automatically. Changes have to be made in the LMS.
+    </p>
+    <section>
+      <h3
+        class="_typography_6v6n8_153 _font-heading-sm-semibold_6v6n8_93"
+      >
+        Profile
+      </h3>
+      <dl
+        class="LmsSyncView-module_details"
+      >
+        <dt>
+          Name
+        </dt>
+        <dd>
+          Tom Trainer
+        </dd>
+        <dt>
+          Email
+        </dt>
+        <dd>
+          sam@example.org
+        </dd>
+        <dt>
+          LMS user ID
+        </dt>
+        <dd>
+          <code>
+            64f0c0ffee0000000000abcd
+          </code>
+        </dd>
+        <dt>
+          Last synced
+        </dt>
+        <dd>
+          6 Oct 2026, 10:00
+        </dd>
+      </dl>
+    </section>
+    <section>
+      <h3
+        class="_typography_6v6n8_153 _font-heading-sm-semibold_6v6n8_93"
+      >
+        Roles
+      </h3>
+      <div
+        class="Flex-module_flex LmsSyncView-module_roles"
+        style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: start; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-2x); --mx-flex-wrap: wrap;"
+      >
+        <span
+          class="_typography_6v6n8_153 _font-body-sm-medium_6v6n8_41 _badge_10dml_8"
+          data-kind="grey"
+        >
+          Trainer
+        </span>
+      </div>
+    </section>
+    <section>
+      <h3
+        class="_typography_6v6n8_153 _font-heading-sm-semibold_6v6n8_93"
+      >
+        Courses
+      </h3>
+      <ul
+        class="LmsSyncView-module_courses"
+      >
+        <li
+          class="LmsSyncView-module_course"
+        >
+          <div
+            class="Flex-module_flex"
+            style="--mx-flex-display: flex; --mx-flex-direction: row; --mx-flex-align: center; --mx-flex-justify: space-between; --mx-flex-gap: var(--cpd-space-3x); --mx-flex-wrap: nowrap;"
+          >
+            <div
+              class="Flex-module_flex"
+              style="--mx-flex-display: flex; --mx-flex-direction: column; --mx-flex-align: start; --mx-flex-justify: start; --mx-flex-gap: var(--cpd-space-1x); --mx-flex-wrap: nowrap;"
+            >
+              <p
+                class="_typography_6v6n8_153 _font-body-md-medium_6v6n8_60"
+              >
+                Webentwicklung
+              </p>
+              <span
+                class="_typography_6v6n8_153 _font-body-sm-medium_6v6n8_41 _badge_10dml_8"
+                data-kind="green"
+              >
+                Trainer
+              </span>
+            </div>
+            <button
+              aria-label="Open Webentwicklung"
+              class="_button_1nw83_8"
+              data-kind="secondary"
+              data-size="md"
+              role="button"
+              tabindex="0"
+            >
+              Open
+            </button>
+          </div>
+        </li>
+      </ul>
+    </section>
+  </div>
+</div>
+`;

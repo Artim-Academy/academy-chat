@@ -138,6 +138,14 @@ describe("<UserSettingsDialog />", () => {
         expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Settings: Devices");
     });
 
+    it("renders with artim academy tab selected", () => {
+        const { container } = render(getComponent({ initialTabId: UserTab.ArtimAcademy }));
+
+        expect(getActiveTabLabel(container)).toEqual("Artim Academy");
+        expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Settings: Artim Academy");
+        expect(screen.getByText("No data has been synced from the Artim Academy LMS yet.")).toBeInTheDocument();
+    });
+
     it("renders with appearance tab selected", () => {
         const { container } = render(getComponent({ initialTabId: UserTab.Appearance }));
 

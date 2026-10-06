@@ -106,6 +106,7 @@ export * from "./core/i18n/I18nApi";
 export * from "./core/utils/linkify";
 export * from "./core/userStatus.ts";
 export * from "./room/avatar/RoomAvatar";
+export * from "./settings/LmsSyncView";
 export * from "./status/SetStatusView";
 export * from "./status/StatusTextView";
 export * from "./status/UserStatusIconView";
