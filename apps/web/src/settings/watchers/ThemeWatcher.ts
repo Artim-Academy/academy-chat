@@ -13,7 +13,7 @@ import { TypedEventEmitter } from "matrix-js-sdk/src/matrix";
 import SettingsStore from "../SettingsStore";
 import dis from "../../dispatcher/dispatcher";
 import { Action } from "../../dispatcher/actions";
-import { findHighContrastTheme, getCustomTheme } from "../../theme";
+import { areBuiltinThemesHidden, findHighContrastTheme, getCustomTheme } from "../../theme";
 import { type ActionPayload } from "../../dispatcher/payloads";
 import { SettingLevel } from "../SettingLevel";
 
@@ -85,6 +85,9 @@ export default class ThemeWatcher extends TypedEventEmitter<ThemeWatcherEvent, T
     }
 
     public getEffectiveTheme(): string {
+        // The system theme can only pick built-in themes.
+        if (areBuiltinThemesHidden()) return SettingsStore.getValue("theme");
+
         // Dev note: Much of this logic is replicated in the AppearanceUserSettingsTab
 
         // If the user has specifically enabled the system matching option (excluding default),
@@ -153,6 +156,7 @@ export default class ThemeWatcher extends TypedEventEmitter<ThemeWatcherEvent, T
     }
 
     public isSystemThemeSupported(): boolean {
+        if (areBuiltinThemesHidden()) return false;
         return this.preferDark.matches || this.preferLight.matches;
     }
 }

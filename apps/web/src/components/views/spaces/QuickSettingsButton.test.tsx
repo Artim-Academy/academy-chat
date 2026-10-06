@@ -15,6 +15,8 @@ import userEvent from "@testing-library/user-event";
 
 import QuickSettingsButton from "./QuickSettingsButton";
 import SettingsStore from "../../../settings/SettingsStore";
+import SdkConfig from "../../../SdkConfig";
+import { SettingLevel } from "../../../settings/SettingLevel";
 import { SDKContextClass } from "../../../contexts/SDKContextClass";
 import { SDKContext } from "../../../contexts/SDKContext.ts";
 
@@ -100,5 +102,16 @@ describe("QuickSettingsButton", () => {
                 });
             });
         });
+    });
+
+    it("does not offer to switch themes when built-in themes are hidden", async () => {
+        SdkConfig.put({ hide_builtin_themes: true });
+        await SettingsStore.setValue("custom_themes", null, SettingLevel.DEVICE, [{ name: "Artim Academy" }]);
+        renderQuickSettingsButton();
+        await openQuickSettings();
+
+        expect(screen.queryByText("Theme")).not.toBeInTheDocument();
+        SdkConfig.reset();
+        SettingsStore.reset();
     });
 });

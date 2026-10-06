@@ -20,6 +20,7 @@ import { type RecheckThemePayload } from "../../../dispatcher/payloads/RecheckTh
 import { Action } from "../../../dispatcher/actions";
 import { useTheme } from "../../../hooks/useTheme";
 import {
+    areBuiltinThemesHidden,
     findHighContrastTheme,
     getOrderedThemes,
     type CustomTheme as CustomThemeType,
@@ -166,7 +167,7 @@ function useThemes(): Array<ITheme & { isDark: boolean }> {
         const builtInThemes = themes.filter((theme) => !customThemeMap.has(theme.name));
         const otherThemes = themes.filter((theme) => customThemeMap.has(theme.name));
 
-        const highContrastTheme = makeHighContrastTheme();
+        const highContrastTheme = areBuiltinThemesHidden() ? undefined : makeHighContrastTheme();
         if (highContrastTheme) builtInThemes.push(highContrastTheme);
 
         const allThemes = builtInThemes.concat(otherThemes);

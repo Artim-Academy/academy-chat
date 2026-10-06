@@ -8,7 +8,7 @@ Please see LICENSE files in the repository root for full details.
 */
 
 import SettingController from "./SettingController";
-import { DEFAULT_THEME, enumerateThemes } from "../../theme";
+import { enumerateThemes, getDefaultTheme } from "../../theme";
 import { type SettingLevel } from "../SettingLevel";
 
 export default class ThemeController extends SettingController {
@@ -23,7 +23,7 @@ export default class ThemeController extends SettingController {
         const themes = enumerateThemes();
         // Override in case some no longer supported theme is stored here
         if (!themes[calculatedValue]) {
-            return DEFAULT_THEME;
+            return getDefaultTheme();
         }
 
         return null; // no override

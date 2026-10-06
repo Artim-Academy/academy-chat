@@ -12,6 +12,7 @@ import { describe, it, expect } from "vitest";
 
 import SettingsStore from "../SettingsStore";
 import ThemeWatcher from "./ThemeWatcher";
+import SdkConfig from "../../SdkConfig";
 import { type SettingLevel } from "../SettingLevel";
 import { type SettingKey, type Settings } from "../Settings.tsx";
 
@@ -208,5 +209,21 @@ describe("ThemeWatcher", function () {
         const themeWatcher = new ThemeWatcher();
         expect(themeWatcher.getEffectiveTheme()).toBe("custom-darkula");
         expect(themeWatcher.isUserOnDarkTheme()).toBe(true);
+    });
+
+    it("ignores the system theme when built-in themes are hidden", () => {
+        SdkConfig.put({ hide_builtin_themes: true });
+        global.matchMedia = makeMatchMedia({ "(prefers-color-scheme: dark)": true });
+        SettingsStore.getValueAt = makeGetValueAt({ use_system_theme: true });
+        SettingsStore.getValue = makeGetValue({
+            use_system_theme: true,
+            theme: "custom-Artim Academy",
+            custom_themes: [{ name: "Artim Academy" }],
+        });
+
+        const themeWatcher = new ThemeWatcher();
+        expect(themeWatcher.isSystemThemeSupported()).toBe(false);
+        expect(themeWatcher.getEffectiveTheme()).toBe("custom-Artim Academy");
+        SdkConfig.reset();
     });
 });

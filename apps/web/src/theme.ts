@@ -27,6 +27,7 @@ import { _t } from "./languageHandler";
 import SettingsStore from "./settings/SettingsStore";
 import ThemeWatcher from "./settings/watchers/ThemeWatcher";
 import { FontWatcher } from "./settings/watchers/FontWatcher";
+import SdkConfig from "./SdkConfig";
 
 export const DEFAULT_THEME = "light";
 const HIGH_CONTRAST_THEMES: Record<string, string> = {
@@ -92,12 +93,7 @@ export function isHighContrastTheme(theme: string): boolean {
     return Object.values(HIGH_CONTRAST_THEMES).includes(theme);
 }
 
-export function enumerateThemes(): { [key: string]: string } {
-    const BUILTIN_THEMES = {
-        "light": _t("common|light"),
-        "light-high-contrast": _t("theme|light_high_contrast"),
-        "dark": _t("common|dark"),
-    };
+function getCustomThemeNames(): Record<string, string> {
     const customThemes = SettingsStore.getValue("custom_themes") || [];
     const customThemeNames: Record<string, string> = {};
 
@@ -111,8 +107,34 @@ export function enumerateThemes(): { [key: string]: string } {
             customThemes,
         });
     }
+    return customThemeNames;
+}
 
+/**
+ * Whether only the custom themes from the config are offered, see `hide_builtin_themes`.
+ */
+export function areBuiltinThemesHidden(): boolean {
+    return !!SdkConfig.get("hide_builtin_themes") && Object.keys(getCustomThemeNames()).length > 0;
+}
+
+export function enumerateThemes(): { [key: string]: string } {
+    const customThemeNames = getCustomThemeNames();
+    if (areBuiltinThemesHidden()) return customThemeNames;
+
+    const BUILTIN_THEMES = {
+        "light": _t("common|light"),
+        "light-high-contrast": _t("theme|light_high_contrast"),
+        "dark": _t("common|dark"),
+    };
     return Object.assign({}, customThemeNames, BUILTIN_THEMES);
+}
+
+/**
+ * The theme to fall back to when the chosen one is not available.
+ */
+export function getDefaultTheme(): string {
+    const themes = enumerateThemes();
+    return themes[DEFAULT_THEME] ? DEFAULT_THEME : Object.keys(themes)[0];
 }
 
 export interface ITheme {

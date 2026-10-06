@@ -96,6 +96,11 @@ export interface WebConfigJson {
     default_widget_container_height?: number; // height in pixels
 
     show_labs_settings?: boolean;
+    /**
+     * Offer only the themes from `setting_defaults.custom_themes` and none of the built-in ones.
+     * Has no effect when no custom theme is configured.
+     */
+    hide_builtin_themes?: boolean;
     features?: Record<string, boolean>; // <FeatureName, EnabledBool>
 
     /**

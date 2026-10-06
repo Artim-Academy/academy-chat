@@ -18,6 +18,7 @@ import { useSettingValue } from "../../../hooks/useSettings";
 import defaultDispatcher from "../../../dispatcher/dispatcher";
 import { Action } from "../../../dispatcher/actions";
 import QuickThemeSwitcher from "./QuickThemeSwitcher";
+import { areBuiltinThemesHidden } from "../../../theme";
 import Modal from "../../../Modal";
 import DevtoolsDialog from "../dialogs/DevtoolsDialog";
 import { SDKContext } from "../../../contexts/SDKContext.ts";
@@ -75,7 +76,7 @@ const QuickSettingsButton: React.FC<{
                     </AccessibleButton>
                 )}
 
-                <QuickThemeSwitcher requestClose={closeMenu} />
+                {!areBuiltinThemesHidden() && <QuickThemeSwitcher requestClose={closeMenu} />}
             </ContextMenu>
         );
     }

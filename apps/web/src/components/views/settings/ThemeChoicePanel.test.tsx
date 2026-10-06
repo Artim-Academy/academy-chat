@@ -16,6 +16,7 @@ import { ThemeChoicePanel } from "./ThemeChoicePanel";
 import SettingsStore from "../../../settings/SettingsStore";
 import ThemeWatcher from "../../../settings/watchers/ThemeWatcher";
 import { SettingLevel } from "../../../settings/SettingLevel";
+import SdkConfig from "../../../SdkConfig";
 
 vi.mock("../../../settings/watchers/ThemeWatcher");
 
@@ -161,6 +162,28 @@ describe("<ThemeChoicePanel />", () => {
 
             expect(screen.getByRole("radio", { name: aliceTheme.name })).toBeInTheDocument();
             expect(asFragment()).toMatchSnapshot();
+        });
+    });
+
+    describe("when built-in themes are hidden", () => {
+        beforeEach(async () => {
+            SdkConfig.put({ hide_builtin_themes: true });
+            await SettingsStore.setValue("custom_themes", null, SettingLevel.DEVICE, [
+                { name: "Artim Academy", is_dark: true, colors: {} },
+            ]);
+        });
+
+        afterEach(() => {
+            SdkConfig.reset();
+            SettingsStore.reset();
+        });
+
+        it("offers only the custom theme", () => {
+            render(<ThemeChoicePanel />);
+
+            expect(screen.getAllByRole("radio")).toHaveLength(1);
+            expect(screen.getByRole("radio", { name: "Artim Academy" })).toBeInTheDocument();
+            expect(screen.queryByRole("radio", { name: "High contrast" })).not.toBeInTheDocument();
         });
     });
 });

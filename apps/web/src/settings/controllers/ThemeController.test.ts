@@ -12,6 +12,7 @@ import SettingsStore from "../SettingsStore";
 import ThemeController from "./ThemeController";
 import { SettingLevel } from "../SettingLevel";
 import { DEFAULT_THEME } from "../../theme";
+import SdkConfig from "../../SdkConfig";
 
 describe("ThemeController", () => {
     vi.spyOn(SettingsStore, "getValue").mockReturnValue([]);
@@ -43,5 +44,16 @@ describe("ThemeController", () => {
         expect(controller.getValueOverride(SettingLevel.ACCOUNT, "$room:server", "dark", SettingLevel.ACCOUNT)).toEqual(
             null,
         );
+    });
+
+    it("falls back to the custom theme when built-in themes are hidden", () => {
+        SdkConfig.put({ hide_builtin_themes: true });
+        vi.spyOn(SettingsStore, "getValue").mockReturnValue([{ name: "Artim Academy" }]);
+        const controller = new ThemeController();
+
+        expect(controller.getValueOverride(SettingLevel.ACCOUNT, "$room:server", "dark", SettingLevel.ACCOUNT)).toEqual(
+            "custom-Artim Academy",
+        );
+        SdkConfig.reset();
     });
 });

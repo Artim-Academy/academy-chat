@@ -12,7 +12,8 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vite
 
 import SettingsStore from "./settings/SettingsStore";
 import { FontWatcher } from "./settings/watchers/FontWatcher";
-import { enumerateThemes, getOrderedThemes, setTheme } from "./theme";
+import { enumerateThemes, getDefaultTheme, getOrderedThemes, setTheme } from "./theme";
+import SdkConfig from "./SdkConfig";
 
 describe("theme", () => {
     afterEach(() => {
@@ -212,6 +213,28 @@ describe("theme", () => {
                 "light-high-contrast": "Light high contrast",
                 "dark": "Dark",
             });
+        });
+    });
+
+    describe("with hide_builtin_themes", () => {
+        beforeEach(() => {
+            SdkConfig.put({ hide_builtin_themes: true });
+        });
+
+        afterEach(() => {
+            SdkConfig.reset();
+        });
+
+        it("offers only the custom themes", () => {
+            vi.spyOn(SettingsStore, "getValue").mockReturnValue([{ name: "Artim Academy" }]);
+            expect(enumerateThemes()).toEqual({ "custom-Artim Academy": "Artim Academy" });
+            expect(getDefaultTheme()).toBe("custom-Artim Academy");
+        });
+
+        it("keeps the built-in themes when no custom theme is configured", () => {
+            vi.spyOn(SettingsStore, "getValue").mockReturnValue([]);
+            expect(Object.keys(enumerateThemes())).toEqual(["light", "light-high-contrast", "dark"]);
+            expect(getDefaultTheme()).toBe("light");
         });
     });
 
