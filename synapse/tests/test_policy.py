@@ -168,8 +168,22 @@ class PowerLevelsTest(unittest.TestCase):
         self.assertEqual(updated["events_default"], 0)
         self.assertEqual(
             updated["users"],
-            {mxid("bot"): 100, mxid("admin1"): 100, mxid("trainer1"): 50},
+            {mxid("bot"): 1000, mxid("admin1"): 100, mxid("trainer1"): 100},
         )
+
+    def test_creators_are_left_out_of_the_user_levels(self) -> None:
+        # In room version 12 creators have unlimited power and must not be listed.
+        policy = make_policy()
+        updated = policy.course_power_levels(
+            {"users": {}}, "web", bot=mxid("bot"), joined=[mxid("admin1")], creators=[mxid("bot")]
+        )
+        self.assertEqual(updated["users"], {mxid("admin1"): 100, mxid("trainer1"): 100})
+
+    def test_missing_power_levels_fall_back_to_course_defaults(self) -> None:
+        policy = make_policy()
+        updated = policy.course_power_levels({}, "web", bot=mxid("bot"), joined=[])
+        self.assertEqual(updated["events_default"], 50)
+        self.assertEqual(updated["events"]["m.room.pinned_events"], 0)
 
     def test_global_rooms_are_admin_only(self) -> None:
         policy = make_policy()

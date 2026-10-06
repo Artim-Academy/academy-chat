@@ -19,6 +19,9 @@ STUDENT = "student"
 
 ADMIN_LEVEL = 100
 TRAINER_LEVEL = 50
+COURSE_OWNER_LEVEL = ADMIN_LEVEL
+# The bot outranks course owners, so it can still remove a trainer who no longer owns the course.
+BOT_LEVEL = 1000
 
 CALL_EVENT_PREFIXES = ("m.call", "org.matrix.msc3401.call", "m.rtc", "org.matrix.msc4143.rtc", "io.element.call")
 WIDGET_EVENT_TYPES = ("im.vector.modular.widgets", "m.widget")
@@ -195,17 +198,26 @@ class Policy:
         }
 
     def course_power_levels(
-        self, current: Mapping[str, Any], course_id: str, bot: str, joined: Iterable[str]
+        self,
+        current: Mapping[str, Any],
+        course_id: str,
+        bot: str,
+        joined: Iterable[str],
+        creators: Iterable[str] = (),
     ) -> dict[str, Any]:
         """Re-assert the role based user levels and leave everything a trainer configured untouched."""
-        users: dict[str, int] = {bot: ADMIN_LEVEL}
+        base = current or self.default_course_power_levels()
+        users: dict[str, int] = {bot: BOT_LEVEL}
         for member in joined:
             if self.is_admin(member):
                 users[member] = ADMIN_LEVEL
         course = self.snapshot.courses.get(course_id)
         if course and course.trainer_id:
-            users.setdefault(self.mxid(course.trainer_id), TRAINER_LEVEL)
-        return {**current, "users": users}
+            users.setdefault(self.mxid(course.trainer_id), COURSE_OWNER_LEVEL)
+        # Creators of rooms from version 12 on have unlimited power and must not be listed.
+        for creator in creators:
+            users.pop(creator, None)
+        return {**base, "users": users}
 
     def global_power_levels(self, current: Mapping[str, Any], bot: str, joined: Iterable[str]) -> dict[str, Any]:
         users = {bot: ADMIN_LEVEL, **{member: ADMIN_LEVEL for member in joined if self.is_admin(member)}}

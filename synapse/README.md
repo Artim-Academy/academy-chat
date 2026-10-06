@@ -6,9 +6,10 @@ Synchronisiert Rollen, Kurse und Einschreibungen aus dem Artim Academy LMS nach 
 
 - **Sync** (alle 5 Minuten und beim ersten Login eines neuen Users) über die Devhub-API des LMS:
   `/dev-api/v1/admin/users`, `/dev-api/v1/courses/courses`, `/dev-api/v1/students/enrollments`.
-- **Pro LMS-Kurs** gibt es einen Space `#course-<courseId>` und einen Raum `#course-<courseId>-general`. Beide gehören dem Bot `@lms-sync`.
-  - Trainer und eingeschriebene Studierende werden automatisch beigetreten.
-  - Wer nicht mehr im Kurs ist, fliegt aus allen Räumen des Kurs-Spaces.
+- **Pro LMS-Kurs** gibt es genau einen Space `#course-<courseId>` mit dem Namen des Kurses. Er gehört dem Bot `@lms-sync`.
+  - Trainer und eingeschriebene Studierende werden automatisch in den Space aufgenommen.
+  - Räume im Space legen die Trainer selbst an. Der Bot wird dabei eingeladen, damit er die Rollen durchsetzen kann.
+  - Wer nicht mehr im Kurs ist, fliegt aus dem Space und allen Räumen darin.
 - **Power-Levels:** In allen Kursräumen setzt der Sync die User-Level neu (Bot/Admin 100, Trainer 50, Studierende 0).
   - Raum-Einstellungen, die ein Trainer gesetzt hat, bleiben unangetastet, z. B. Schreiben für Studierende freigeben.
 - **Account-Data:** Der Sync schreibt `de.artim_academy.lms_sync`. Daraus liest die Settings-Seite „Artim Academy“ im Client.

@@ -7,11 +7,11 @@ from collections.abc import Mapping
 from typing import Any
 
 from synapse.api.errors import Codes, SynapseError
-from synapse.module_api import NOT_SPAM, ModuleApi
+from synapse.module_api import NOT_SPAM, ModuleApi, RatelimitOverride
 from synapse.types import Requester
 
 from .lms_client import LmsClient, LmsConfig
-from .policy import LmsCourse, LmsSnapshot, Policy
+from .policy import BOT_LEVEL, COURSE_OWNER_LEVEL, LmsCourse, LmsSnapshot, Policy
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +21,13 @@ SPACE_PARENT = "m.space.parent"
 SPACE_CHILD = "m.space.child"
 MEMBER = "m.room.member"
 POWER_LEVELS = "m.room.power_levels"
+ROOM_NAME = "m.room.name"
+ROOM_CREATE = "m.room.create"
+# Room versions in which creators are ordinary users with a power level.
+PRE_CREATOR_POWER_ROOM_VERSIONS = {str(version) for version in range(1, 12)}
+# From room version 12 on creators get unlimited power and must not be listed in the power levels.
+# Course rooms need explicit levels for their creator, so the LMS can stay the source of truth.
+COURSE_ROOM_VERSION = "11"
 # Refresh the visible sync time at most hourly, so not every sync run pushes account data to all clients.
 SYNCED_AT_REFRESH_MS = 60 * 60 * 1000
 
@@ -33,11 +40,12 @@ class ArtimLms:
         self._bot_displayname = config.get("bot_displayname", "Artim Academy")
         self._extra_admins = frozenset(config.get("extra_admins", [])) | {self._bot}
         self._global_rooms: list[str] = list(config.get("global_rooms", []))
-        self._general_room_name: str = config.get("general_room_name", "Allgemein")
         self._policy = Policy(LmsSnapshot.empty(), self._server_name, self._extra_admins)
         self._room_course: dict[str, str | None] = {}
         self._course_space: dict[str, str] = {}
         self._syncing = False
+        # Users the sync is currently joining to a course space, so their join ratelimit does not apply.
+        self._sync_joins: set[str] = set()
 
         self._client = LmsClient(
             LmsConfig(
@@ -66,6 +74,7 @@ class ArtimLms:
             on_create_room=self.on_create_room, check_can_deactivate_user=self.check_can_deactivate_user
         )
         api.register_account_validity_callbacks(on_user_login=self.on_user_login)
+        api.register_ratelimit_callbacks(get_ratelimit_override_for_user=self.get_ratelimit_override_for_user)
 
         interval_ms = int(config.get("sync_interval_seconds", 300)) * 1000
         api.looping_background_call(self.sync, interval_ms, desc="artim_lms_sync")
@@ -144,16 +153,21 @@ class ArtimLms:
         if not self._policy.may_create_room(creator, parent_course=course):
             raise SynapseError(403, "Only trainers of this course may create rooms in it.", Codes.FORBIDDEN)
 
-        creator_level = 100 if self._policy.is_admin(creator) else 50
+        request_content["room_version"] = COURSE_ROOM_VERSION
         request_content["power_level_content_override"] = {
             **Policy.default_course_power_levels(),
-            "users": {creator: creator_level, self._bot: 100},
+            "users": {creator: COURSE_OWNER_LEVEL, self._bot: BOT_LEVEL},
         }
         # The bot has to be in the room to keep roles in line with the LMS later on.
         request_content["invite"] = [*request_content.get("invite", []), self._bot]
 
     async def check_can_deactivate_user(self, user_id: str, by_admin: bool) -> bool:
         return self._policy.may_deactivate(user_id, by_admin)
+
+    async def get_ratelimit_override_for_user(self, user_id: str, limiter_name: str) -> RatelimitOverride | None:
+        if user_id == self._bot or user_id in self._sync_joins:
+            return RatelimitOverride(per_second=0.0, burst_count=0)
+        return None
 
     async def on_user_login(self, user_id: str, auth_provider_type: str | None, auth_provider_id: str | None) -> None:
         if self._policy.lms_id(user_id) not in self._policy.snapshot.users:
@@ -221,6 +235,16 @@ class ArtimLms:
         localpart = self._bot.split(":")[0].lstrip("@")
         if await self._api.check_user_exists(self._bot) is None:
             await self._api.register_user(localpart, displayname=self._bot_displayname)
+        # The request ratelimiter only honours this table, module ratelimit callbacks do not reach it.
+        await self._api.run_db_interaction("artim_lms_bot_ratelimit", self._exempt_from_ratelimit, self._bot)
+
+    @staticmethod
+    def _exempt_from_ratelimit(txn: Any, user_id: str) -> None:
+        txn.execute(
+            "INSERT INTO ratelimit_override (user_id, messages_per_second, burst_count) VALUES (?, 0, 0)"
+            " ON CONFLICT (user_id) DO UPDATE SET messages_per_second = 0, burst_count = 0",
+            (user_id,),
+        )
 
     async def _resolve_alias(self, alias: str) -> str | None:
         try:
@@ -234,13 +258,15 @@ class ArtimLms:
         if existing:
             return existing
         room_id, _ = await self._api.create_room(
-            self._bot, {**config, "room_alias_name": alias_name, "preset": "private_chat"}, ratelimit=False
+            self._bot,
+            {**config, "room_alias_name": alias_name, "preset": "private_chat", "room_version": COURSE_ROOM_VERSION},
+            ratelimit=False,
         )
         return room_id
 
     async def _sync_course(self, course: LmsCourse) -> dict[str, str | None]:
         marker = {"type": COURSE_STATE_TYPE, "state_key": "", "content": {"course_id": course.course_id}}
-        power_levels = {**Policy.default_course_power_levels(), "users": {self._bot: 100}}
+        power_levels = {**Policy.default_course_power_levels(), "users": {self._bot: BOT_LEVEL}}
         space_id = await self._ensure_room(
             f"course-{course.course_id}",
             {
@@ -251,28 +277,38 @@ class ArtimLms:
             },
         )
         self._course_space[course.course_id] = space_id
-        general_id = await self._ensure_room(
-            f"course-{course.course_id}-general",
-            {
-                "name": f"{course.title} – {self._general_room_name}",
-                "initial_state": [
-                    marker,
-                    {"type": SPACE_PARENT, "state_key": space_id, "content": {"via": [self._server_name], "canonical": True}},
-                ],
-                "power_level_content_override": power_levels,
-            },
-        )
-        await self._send_state(space_id, SPACE_CHILD, general_id, {"via": [self._server_name], "suggested": True})
-
-        rooms = {space_id, general_id} | await self._space_children(space_id)
+        await self._send_state(space_id, ROOM_NAME, "", {"name": course.title})
+        await self._retire_general_room(course.course_id, space_id)
+        rooms = {space_id} | await self._space_children(space_id)
         members = {
             mxid
             for mxid in map(self._policy.mxid, self._policy.snapshot.members_of(course.course_id))
             if await self._api.check_user_exists(mxid)
         }
         for room_id in rooms:
-            await self._sync_room_members(room_id, course.course_id, members, auto_join=room_id in (space_id, general_id))
+            await self._sync_room_members(room_id, course.course_id, members, auto_join=room_id == space_id)
         return {room_id: course.course_id for room_id in rooms}
+
+    async def _retire_general_room(self, course_id: str, space_id: str) -> None:
+        # The first rollout created an extra general room per course. Rooms in a course space are up to the trainers.
+        room_id = await self._resolve_alias(f"#course-{course_id}-general:{self._server_name}")
+        if room_id is None:
+            return
+        memberships = await self._memberships(room_id)
+        if memberships.get(self._bot) != "join":
+            return
+        await self._send_state(space_id, SPACE_CHILD, room_id, {})
+        for user_id, membership in memberships.items():
+            if user_id != self._bot and membership in ("join", "invite") and not self._policy.is_admin(user_id):
+                await self._api.update_room_membership(self._bot, user_id, room_id, "leave")
+        await self._api.update_room_membership(self._bot, self._bot, room_id, "leave")
+
+    async def _creators(self, room_id: str) -> set[str]:
+        state = await self._api.get_room_state(room_id, [(ROOM_CREATE, "")])
+        create = state.get((ROOM_CREATE, ""))
+        if create is None or create.content.get("room_version", "1") in PRE_CREATOR_POWER_ROOM_VERSIONS:
+            return set()
+        return {create.sender, *create.content.get("additional_creators", [])}
 
     async def _space_children(self, space_id: str) -> set[str]:
         state = await self._api.get_room_state(space_id, [(SPACE_CHILD, None)])
@@ -300,11 +336,17 @@ class ArtimLms:
                 if memberships.get(user_id) not in ("join", "ban"):
                     if memberships.get(user_id) != "invite":
                         await self._api.update_room_membership(self._bot, user_id, room_id, "invite")
-                    await self._api.update_room_membership(user_id, user_id, room_id, "join")
+                    self._sync_joins.add(user_id)
+                    try:
+                        await self._api.update_room_membership(user_id, user_id, room_id, "join")
+                    finally:
+                        self._sync_joins.discard(user_id)
 
         joined = [user_id for user_id, membership in (await self._memberships(room_id)).items() if membership == "join"]
+        creators = await self._creators(room_id)
         await self._apply_power_levels(
-            room_id, lambda current: self._policy.course_power_levels(current, course_id, self._bot, joined)
+            room_id,
+            lambda current: self._policy.course_power_levels(current, course_id, self._bot, joined, creators),
         )
 
     async def _sync_global_rooms(self) -> None:
