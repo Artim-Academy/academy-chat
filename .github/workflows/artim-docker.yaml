@@ -22,8 +22,6 @@ jobs:
 
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
-              with:
-                  install: true
 
             - name: Log in to GHCR
               uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
@@ -53,6 +51,6 @@ jobs:
                   targets: element-web
                   push: true
                   set: |
-                      element-web.platforms=linux/amd64
+                      element-web.platform=linux/amd64
                       element-web.cache-from=type=gha
                       element-web.cache-to=type=gha,mode=max
