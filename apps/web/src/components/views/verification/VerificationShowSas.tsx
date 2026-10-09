@@ -54,17 +54,8 @@ export default class VerificationShowSas extends React.Component<IProps, IState>
     public render(): React.ReactNode {
         let sasDisplay;
         let sasCaption;
-        if (this.props.sas.emoji) {
-            sasDisplay = (
-                <SasEmoji
-                    className="mx_VerificationShowSas_emojiSas"
-                    emoji={this.props.sas.emoji.map((e) => e[0]) as ComponentProps<typeof SasEmoji>["emoji"]}
-                />
-            );
-            sasCaption = this.props.isSelf
-                ? _t("encryption|verification|confirm_the_emojis")
-                : _t("encryption|verification|sas_emoji_caption_user");
-        } else if (this.props.sas.decimal) {
+        // Artim: compare numbers everywhere so the web client and the mobile app show the same thing.
+        if (this.props.sas.decimal) {
             sasDisplay = (
                 <div className="mx_VerificationShowSas_decimalSas">
                     <span>{this.props.sas.decimal[0]}</span>
@@ -75,6 +66,16 @@ export default class VerificationShowSas extends React.Component<IProps, IState>
             sasCaption = this.props.isSelf
                 ? _t("encryption|verification|sas_caption_self")
                 : _t("encryption|verification|sas_caption_user");
+        } else if (this.props.sas.emoji) {
+            sasDisplay = (
+                <SasEmoji
+                    className="mx_VerificationShowSas_emojiSas"
+                    emoji={this.props.sas.emoji.map((e) => e[0]) as ComponentProps<typeof SasEmoji>["emoji"]}
+                />
+            );
+            sasCaption = this.props.isSelf
+                ? _t("encryption|verification|confirm_the_emojis")
+                : _t("encryption|verification|sas_emoji_caption_user");
         } else {
             return (
                 <div>
